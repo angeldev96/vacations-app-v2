@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/home/cisa/vacations-app/server/logs/.cd540da75f0fb7e4756db97e98f070e00e0e11a8-audit.json",
+    "files": [
+        {
+            "date": 1745443062481,
+            "name": "/home/cisa/vacations-app/server/logs/cronjob-info-2025-04-23.log",
+            "hash": "7dac25a7e5d0674eba1a4e6c92f35197fb61c0533dc0bc38acab8459c237e5c9"
+        }
+    ],
+    "hashType": "sha256"
+}

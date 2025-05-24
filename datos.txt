@@ -1,0 +1,83 @@
+necesito que me ayuden con algo que estoy realizando, pero principalmente te dare algo de contexto, tengo las siguientes tablas en MYSQL:
+
+CREATE TABLE empleados (
+empleado_id int NOT NULL AUTO_INCREMENT,
+nombre varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+dni varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+fecha_ingreso date NOT NULL,
+anio_actual_empleo int DEFAULT '0',
+fecha_ultimo_aniversario date DEFAULT NULL,
+mes_actual_anio_laboral int DEFAULT '0',
+dias_vacaciones_acumulados decimal(6,4) DEFAULT NULL,
+dias_vacaciones_tomados decimal(7,4) DEFAULT NULL,
+fecha_ultima_acumulacion date DEFAULT NULL,
+empresa enum('UPCO','IDSA','ARRAYAN','DURRIKIKARA','FINCASA','LYNX') COLLATE utf8mb4_general_ci NOT NULL,
+ubicacion enum('La Esperanza','Tegucigalpa','Utila') COLLATE utf8mb4_general_ci DEFAULT NULL,
+empleado_activo tinyint(1) DEFAULT '1',
+cel_empleado varchar(15) COLLATE utf8mb4_general_ci DEFAULT NULL,
+PRIMARY KEY (empleado_id)
+
+vacaciones | CREATE TABLE vacaciones (
+vacacion_id int NOT NULL AUTO_INCREMENT,
+empleado_id int DEFAULT NULL,
+fecha_inicio datetime NOT NULL,
+fecha_fin datetime NOT NULL,
+motivo text COLLATE utf8mb4_general_ci,
+estado varchar(20) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'pendiente',
+fecha_solicitud timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+dias_solicitados float DEFAULT '0',
+PRIMARY KEY (vacacion_id),
+KEY empleado_id (empleado_id),
+CONSTRAINT Vacaciones_ibfk_1 FOREIGN KEY (empleado_id) REFERENCES empleados (empleado_id)
+
+------------------------------------------------------------------------------------------------------
+
+
+Esque actualmente en la empresa que laburo se calculan las vacaciones de la siguiente manera:
+
+	Primer año: 10 días / 12 meses = 0.8333333333 días por mes
+
+	Segundo año: 12 días / 12 meses = 1 día por mes
+
+	Tercer año: 15 días / 12 meses = 1.25 días por mes
+
+	Cuarto año en adelante: 20 días / 12 meses = 1.6666666667 días por mes
+
+
+
+
+Se multiplica el factor correspondiente por los meses trabajados en el año actual en la que el empleado esta solicitando las vacaciones.
+
+
+Por ejemplo:
+
+Un empleado entro a trabajar el 2 de julio de 2024, este mismo empleado tendra factor de 0.83333 hasta el 1 de julio de 2025
+si este empleado solicita vacaciones el dia 19 de septiembre,entonces:
+
+del 2 de julio que es el dia que entro, hasta el 2 septiembre son: 2 meses laborando (en el ejemplo se menciono hasta el 19 de septiembre, pero este empleado cumple nuevo mes cada 2 de tal mes)
+
+
+------------------------------------------------------------------------------------------------------
+
+Excelente veo que si comprendes bien.
+
+Esque actualmente tengo un cronjob en javascript que interactua con mi backend para que todos los dias a la media noche, le sume los dias correspondiente a los empleados que cumplen nuevo mes laboral
+o asi mismo, los empleados que entran a un nuevo año laboral, pues cambiarle su año de trabajo actual para que al hacer el calculo de vacaciones, el factor cambiarle
+
+Comprendes hasta aqui?
+
+----------------
+
+
+Flujo para actualizacion de dias de vacaciones para los empleados:
+
+a las 12:10 AM de todos los dias, se evalua que nuevo empleado cumple un nuevo mes o un nuevo año de empleado
+
+- Si cumple un nuevo año, quiere decir que su factor de vacaciones cambia, a excepcion de que tenga 4 años o mas de trabajo.
+
+- a su vez, Si cumple un nuevo año, se le deberia tambien sumar su dia de vacacion correspondiente con el ultimo factor, por ejemplo:
+
+un empleado entro a trabajar el 15 de febrero de 2024, entonces a este empleado a las 12:10 AM de la medianoche pasaria a su segundo año laboral, osea su factor pasaria de 0.8333 a 1
+pero, a su vez cumple su mes numero 12 de empleo, el cual seria de cumplir su dia de vecaciones con factor 0.8333.
+
+Se comprende hasta aqui?

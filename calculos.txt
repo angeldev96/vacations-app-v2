@@ -1,0 +1,15 @@
+aqui las siguientes reglas:
+El cálculo depende de los años de antigüedad del empleado:
+
+Primer año: 10 días / 12 meses = 0.8333333333 días por mes
+
+Tercer año: 15 días / 12 meses = 1.25 días por mes
+
+Cuarto año en adelante: 20 días / 12 meses = 1.6666666667 días por mes
+
+Se multiplica el factor correspondiente por los meses trabajados en el año.
+
+En el ejemplo dado, para alguien con 3.5 meses trabajados en su primer año:
+0.8333333333 × 3.5 = 2.92 días de vacaciones
+
+Las vacaciones solo se pueden acumular por un máximo de 2 años. Después de ese tiempo, se pierden según la ley.

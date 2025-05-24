@@ -1,0 +1,195 @@
+	Ok, necesito la implementacion de lo siguiente en mi aplicacion web, comencemos con la base de datos, de momento esta asi:
+
+		CREATE DATABASE gestion_vacaciones;
+		USE gestion_vacaciones;
+
+		-- Tabla de empleados
+		CREATE TABLE Empleados (
+			empleado_id INT AUTO_INCREMENT PRIMARY KEY,
+			nombre VARCHAR(100) NOT NULL,
+			dni VARCHAR(20) NOT NULL,
+			fecha_ingreso DATE NOT NULL,
+			dias_proporcionales INT DEFAULT 0,
+			dias_disfrutados INT DEFAULT 0,
+			ubicacion_empleado VARCHAR(50)
+		);
+
+		-- Tabla de vacaciones
+		CREATE TABLE Vacaciones (
+		vacacion_id INT AUTO_INCREMENT PRIMARY KEY,
+		empleado_id INT,
+		fecha_inicio DATETIME NOT NULL,
+		fecha_fin DATETIME NOT NULL,
+		motivo TEXT,
+		estado VARCHAR(20) NOT NULL DEFAULT 'pendiente',
+		fecha_solicitud TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (empleado_id) REFERENCES Empleados(empleado_id)
+	);
+
+
+
+
+
+	CREATE TABLE users (
+		id INT AUTO_INCREMENT PRIMARY KEY,
+		first_name VARCHAR(255) NOT NULL,
+		last_name VARCHAR(255) NOT NULL,
+		username VARCHAR(255) NOT NULL UNIQUE,
+		password VARCHAR(255) NOT NULL,
+		email VARCHAR(255) NOT NULL UNIQUE,
+		role ENUM('superadmin', 'admin', 'user') NOT NULL,
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+	);
+
+
+
+
+
+
+
+
+	Esa es la base de datos con mysql.
+
+	el objetivo es poder gestinar cuando un empleado necesita solicitar vacaciones.
+
+	ahora lo que me falta es ajustar o modificar mi base de datos para que se ajuste a mis nececidades.
+
+	al empleado solicitar vacaciones, se deben de tomar en cuenta las siguientes reglas.
+
+	El cálculo depende de los años de antigüedad del empleado:
+
+	Primer año: 10 días / 12 meses = 0.8333333333 días por mes
+
+	Segundo año: 12 días / 12 meses = 1 día por mes
+
+	Tercer año: 15 días / 12 meses = 1.25 días por mes
+
+	Cuarto año en adelante: 20 días / 12 meses = 1.6666666667 días por mes
+
+	Se multiplica el factor correspondiente por los meses trabajados en el año actual en la que el empleado esta solicitando las vacaciones.
+
+	En el ejemplo dado, para alguien con 3.5 meses trabajados en su primer año:
+	0.8333333333 × 3.5 = 2.92 días de vacaciones
+
+	IMPORTANTE: cuando un empleado recien ingresa, entra dentro de la categoria de primer año.
+	Es decir, si un empleado entro el 02 de julio de 2024, esta en la categoria de 1 año desde 02 de julio de 2024 al 01 de julio de 2025
+	Luego, del 02 de julio de 2025 al 01 de julio de 2026, esta en la categoria del año 2.
+	Luego, del 02 de julio de 2026 al 01 de julio de 2027, esta en la categoria del año 3.
+	Luego, del 02 de julio de 2027 en adelante, esta en la categoria del año 4.
+
+
+	ademas, un empleado solo puede acumular vacaciones por un máximo de 2 años. Después de ese tiempo, se pierden según la ley.
+
+	Por ejemplo, si un empleado comenzó a trabajar 2022
+	Ya acumulo 3 días en ese 2022
+	Acumulo 4 días en el 2023
+	Y lleva acumulados en 2024 2 días.
+
+	En total llevaría acumulados los 6 días (4 del 2023 y 2 del 2024), ya que los 3 días del 2022 tienen dos años de antigüedad, y son perdidos según la ley.
+
+
+	entonces necesito que mi base de datos se ajuste correctamente a estos calculos y reglas
+
+	cabe recalcar que los dias acumulados son simplemente dias que un empleado no tomo en ese año
+
+
+	estoy usando mysql, node/express en backend
+
+
+
+	Demo para el proceso de calculo de vacaciones de un empleado:
+
+Primer escenario
+El empleado A entro a trabajar el 2 de julio de 2024
+el empleado A solicita vacaciones el 10 de diciembre de 2024
+del 2 de julio al 10 de Diciembre han pasado 5 meses.
+Como el empleado A comenzo a trabajar en 2 de julio 2024, y la fecha en la que se piden las vacaciones es 10 de diciembre 2024, el empleado A 
+esta en su año #1 de empleado, por lo tanto usaremos el factor de 0.833333
+
+entonces se hace la operacion 5 * 0.83333 = 4.1666, el 5 son los meses que lleva laborados en su año 1 de empleo,
+las vacaciones, el 0.83333 el factor que le corresponde por ser su año 1 de empleo, y 
+el 4.1666 son los dias que le corresponden de vacaciones.
+
+
+
+
+Segundo escenario:
+El empleado B comenzo a trabajar en 5 febrero del 2023
+El empleado B en el año de 2023 acumulo un total de 9.16 dias de vacaciones, pero uso 6 dias en ese año
+Por lo tanto, le sobraron 3.16 dias de vacaciones.
+
+Luego empleado B solicita vacaciones en 6 septiembre de 2024
+de enero a septiembre del han pasado 9 meses, pero ojo, el empleado B ya entra en categoria de su año 2 laborado.
+Como el empleado B comenzo a trabajar en 2023, y la fecha año actual es 2024, el empleado B 
+esta en su año #2 de empleo, por lo tanto usaremos el factor de 1, osea 1 dia por mes.
+
+Entonces se hace la operacion 9 * 1 = 9, el 9 es el mes del año en el que pide 
+las vacaciones (septiembre), 1  el factor que le corresponde por ser su año 2 de empleo, y 
+el 9 es el resultado, son los dias que le corresponden de vacaciones.
+
+
+Tercer escenario:
+El empleado C comenzo a trabajar en marzo de 2022
+en ese año 2022 acumulo 10 dias pero uso 8, le sobraron 2 en ese año
+en el año 2023 acumulo 12, pero no tomo ninguno, entonces tiene esos 12, mas los 2 dias sobrantes del 2022, suman 14
+en el año 2024, lleva acumulados 5 dias, entonces se suman los 12 dias sobrantes del 2023, y los 2 dias que tenia del 2022, se vencen, 
+ya que tienen dos años de antiguedad.
+
+
+los factores son los siguientes:
+
+- Primer año: (este es el año en el que ingreso) 0.8333333
+- Segundo año: 1
+- Tercer año: 1.25
+- Cuarto año o mas: 1.666666
+
+
+
+
+
+Necesito que modifiquemos la base de datos de manera que se ajuste perfectamente a las transacciones que se necesitan hacer,
+ a los cálculos que se necesitan hacer y solicitudes. También recuerda que hay que tener en cuenta que las vacaciones 
+ acumuladas, o sea los días acumulados, tienen como vigencia dos años, dos años como máximo. Después de dos años se vencen
+  y por la ley se pierden. También debes de tener en cuenta que el proceso para solicitar una dias de vacacion, se deberian deducir dias,  pero deberían tomarse los más antiguos para que se reduzcan estos que son los más antiguos, para evitar
+   perderlos en un futuro.
+
+
+Es necesario crear una especie de logica o pocedimiento almacenado para que se vaya actualizando la antiguedad de un empleado, ya que es importante saber
+en que categoria.
+
+aqui las categorias explicadas nuevamente:
+IMPORTANTE: cuando un empleado recien ingresa, entra dentro de la categoria de primer año.
+Es decir, si un empleado entro el 02 de julio de 2024, esta en la categoria de 1 año desde 02 de julio de 2024 al 01 de julio de 2025
+Luego, del 02 de julio de 2025 al 01 de julio de 2026, esta en la categoria del año 2.
+Luego, del 02 de julio de 2026 al 01 de julio de 2027, esta en la categoria del año 3.
+Luego, del 02 de julio de 2027 en adelante, esta en la categoria del año 4.
+
+
+entonces, comencemos primero con la base de datos.
+
+ya que se debe ajustar perfectamente a todo.
+
+modifiquemos la existente de manera que quede a base de datos ideal de manera que se ajuste a todas las necesidades que necesitamos
+
+
+
+| empleados | CREATE TABLE `empleados` (
+  `empleado_id` int NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `dni` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `fecha_ingreso` date NOT NULL,
+  `anio_actual_empleo` int DEFAULT '0',
+  `fecha_ultimo_aniversario` date DEFAULT NULL,
+  `mes_actual_anio_laboral` int DEFAULT '0',
+  `dias_vacaciones_acumulados` decimal(6,4) DEFAULT NULL,
+  `dias_vacaciones_tomados` decimal(7,4) DEFAULT NULL,
+  `fecha_ultima_acumulacion` date DEFAULT NULL,
+  `empresa` enum('UPCO','IDSA','ARRAYAN','DURRIKIKARA','FINCASA','LYNX') COLLATE utf8mb4_general_ci NOT NULL,
+  `ubicacion` enum('La Esperanza','Tegucigalpa','Utila') COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `empleado_activo` tinyint(1) DEFAULT '1',
+  `cel_empleado` varchar(15) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (`empleado_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=118 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci |
+
+
