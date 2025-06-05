@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 /* eslint-disable react/prop-types */
 import React, { useState, useEffect } from 'react';
 
-import Box from '@mui/material/Box';
+import { Box } from '@mui/material';
 import Card from '@mui/material/Card';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';

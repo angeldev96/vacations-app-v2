@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import Box from '@mui/material/Box';
+import { Box } from '@mui/material';
 import List from '@mui/material/List';
 import Button from '@mui/material/Button';
 import Popover from '@mui/material/Popover';

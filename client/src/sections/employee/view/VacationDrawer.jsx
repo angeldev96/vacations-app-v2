@@ -6,7 +6,7 @@ import isBetween from 'dayjs/plugin/isBetween';
 import React, { useState, useEffect } from 'react';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 
-import Box from '@mui/material/Box';
+import { Box } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
