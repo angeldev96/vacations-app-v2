@@ -21,10 +21,10 @@ const db = require("./src/config/database");
 const timeZone = "America/Tegucigalpa";
 
 const getVacationFactor = (anioActualEmpleo) => {
-  if (anioActualEmpleo === 0) return 0.8333;
+  if (anioActualEmpleo === 0) return 0.83;
   if (anioActualEmpleo === 1) return 1.0;
   if (anioActualEmpleo === 2) return 1.25;
-  return 1.6667; // Si es 3 o más, aplica el factor 1.6667
+  return 1.66; // Si es 3 o más, aplica el factor 1.6667
 };
 
 const updateEmployeeData = async () => {
@@ -55,8 +55,16 @@ const updateEmployeeData = async () => {
           dias_vacaciones_acumulados: vacacionesAnteriores,
           fecha_ultima_acumulacion,
           dias_vacaciones_tomados,
-          anio_actual_empleo: currentYear
+          anio_actual_empleo: currentYear,
+          mes_actual_anio_laboral: currentMonth,
+          empleado_activo
         } = employee;
+
+        // Solo procesar empleados activos
+        if (!empleado_activo) {
+          console.log(`  Empleado ID: ${empleado_id} - Empleado inactivo, omitiendo`);
+          continue;
+        }
 
         // Convertir fecha_ingreso a Date si es necesario
         let ingresoDate;
@@ -82,11 +90,19 @@ const updateEmployeeData = async () => {
         console.log(`  Fecha de ingreso: ${format(ingresoDate, 'yyyy-MM-dd')}`);
         console.log(`  Día de ingreso: ${ingresoDayOfMonth}, Mes de ingreso: ${ingresoMonth + 1}`);
         
-        // Verificar si es aniversario anual (mismo día y mes)
-        const isAnnualAnniversary = todayDay === ingresoDayOfMonth && todayMonth === ingresoMonth;
+        // Manejo especial para días que no existen en todos los meses
+        let anniversaryDay = ingresoDayOfMonth;
+        if (ingresoDayOfMonth > 28) {
+          // Para empleados que ingresaron el 29, 30 o 31, usar el último día del mes actual
+          const lastDayOfMonth = new Date(today.getFullYear(), todayMonth + 1, 0).getDate();
+          anniversaryDay = Math.min(ingresoDayOfMonth, lastDayOfMonth);
+        }
         
-        // Verificar si es aniversario mensual (mismo día)
-        const isMonthlyAnniversary = todayDay === ingresoDayOfMonth;
+        // Verificar si es aniversario anual (mismo día y mes)
+        const isAnnualAnniversary = todayDay === anniversaryDay && todayMonth === ingresoMonth;
+        
+        // Verificar si es aniversario mensual (mismo día o último día del mes si el día no existe)
+        const isMonthlyAnniversary = todayDay === anniversaryDay;
         
         if (!isMonthlyAnniversary && !isAnnualAnniversary) {
           console.log(`  Empleado ID: ${empleado_id} - Hoy no es día de acumulación`);
@@ -118,14 +134,9 @@ const updateEmployeeData = async () => {
         console.log(`  Años trabajados (calculados): ${yearsWorked}`);
         console.log(`  Años trabajados (en BD): ${currentYear}`);
         
-        // Comprobar si hay discrepancia entre años calculados y almacenados
-        if (yearsWorked !== currentYear && isAnnualAnniversary) {
-          console.log(`  ¡ANIVERSARIO ANUAL! - Actualización de factor`);
-        }
-
         let accumulatedVacationDays = parseFloat(vacacionesAnteriores || 0);
         let newYear = currentYear;
-        let newMonth = 1;
+        let newMonth = currentMonth || 1;
 
         // Si es aniversario anual
         if (isAnnualAnniversary) {
@@ -136,7 +147,7 @@ const updateEmployeeData = async () => {
           // Obtener el nuevo factor basado en el nuevo año
           const newFactor = getVacationFactor(newYear);
           
-          console.log(`  Aniversario anual: Año ${newYear}, Nuevo factor: ${newFactor}`);
+          console.log(`  ¡ANIVERSARIO ANUAL! - Año ${newYear}, Nuevo factor: ${newFactor}`);
           
           // Acumular con el nuevo factor
           accumulatedVacationDays += newFactor;
@@ -145,15 +156,17 @@ const updateEmployeeData = async () => {
           const currentFactor = getVacationFactor(currentYear);
           accumulatedVacationDays += currentFactor;
           
-          // Actualizar mes actual del año laboral
-          const monthsSinceLastAnniversary = differenceInMonths(today, addYears(ingresoDate, currentYear));
-          newMonth = (monthsSinceLastAnniversary % 12) + 1;
+          // Incrementar el mes actual del año laboral
+          newMonth = (currentMonth || 0) + 1;
+          if (newMonth > 12) {
+            newMonth = 12; // Máximo 12 meses
+          }
           
           console.log(`  Acumulación mensual: Factor ${currentFactor}, Mes del año laboral: ${newMonth}`);
         }
 
-        // Asegurar que los días acumulados tengan 4 decimales
-        accumulatedVacationDays = parseFloat(accumulatedVacationDays.toFixed(4));
+        // Asegurar que los días acumulados tengan 2 decimales
+        accumulatedVacationDays = parseFloat(accumulatedVacationDays.toFixed(2));
 
         console.log(`  Resumen actualización:`);
         console.log(`  - Años trabajados: ${newYear}`);
@@ -182,7 +195,7 @@ const updateEmployeeData = async () => {
 };
 
 // Configurar el cronjob para que se ejecute todos los días a las 00:10 am
-new cron.CronJob("13 10 * * *", updateEmployeeData, null, true, timeZone);
+new cron.CronJob("10 0 * * *", updateEmployeeData, null, true, timeZone);
 
 // Ejecutar la función inmediatamente para actualizar a los empleados
 updateEmployeeData();

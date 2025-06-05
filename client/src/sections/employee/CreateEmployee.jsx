@@ -47,6 +47,8 @@ const EmployeeRegistrationForm = () => {
           break;
         case 'ARRAYAN':
         case 'DURRIKIKARA':
+        case 'LYNX':
+        case 'FINCASA':
           newFormData.ubicacion = 'La Esperanza';
           break;
         default:
@@ -135,9 +137,9 @@ const EmployeeRegistrationForm = () => {
                   <MenuItem value="UPCO">UPCO</MenuItem>
                   <MenuItem value="IDSA">IDSA</MenuItem>
                   <MenuItem value="ARRAYAN">ARRAYAN</MenuItem>
-                  <MenuItem value="ARRAYAN">LYNX</MenuItem>
+                  <MenuItem value="LYNX">LYNX</MenuItem>
                   <MenuItem value="DURRIKIKARA">DURRIKIKARA</MenuItem>
-                  <MenuItem value="DURRIKIKARA">FINCASA</MenuItem>
+                  <MenuItem value="FINCASA">FINCASA</MenuItem>
 
                 </Select>
               </FormControl>
