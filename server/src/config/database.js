@@ -238,12 +238,15 @@ const getVacationHistory = async (page = 1, limit = 10) => {
       `SELECT v.*, e.nombre, e.dni
        FROM vacaciones v
        JOIN empleados e ON v.empleado_id = e.empleado_id
+       WHERE e.empleado_activo = 1
        ORDER BY v.fecha_solicitud DESC
        LIMIT ? OFFSET ?`,
       [limit, offset]
     );
     
-    const [countResult] = await pool.query('SELECT COUNT(*) as total FROM vacaciones');
+    const [countResult] = await pool.query(
+      'SELECT COUNT(*) as total FROM vacaciones v JOIN empleados e ON v.empleado_id = e.empleado_id WHERE e.empleado_activo = 1'
+    );
     const total = countResult[0].total;
 
     return { rows, total };
@@ -517,12 +520,15 @@ const getPermissionHistory = async (page = 1, limit = 10) => {
       `SELECT p.*, e.nombre, e.dni
        FROM permisos p
        JOIN empleados e ON p.empleado_id = e.empleado_id
+       WHERE e.empleado_activo = 1
        ORDER BY p.fecha_solicitud DESC
        LIMIT ? OFFSET ?`,
       [limit, offset]
     );
     
-    const [countResult] = await pool.query('SELECT COUNT(*) as total FROM permisos');
+    const [countResult] = await pool.query(
+      'SELECT COUNT(*) as total FROM permisos p JOIN empleados e ON p.empleado_id = e.empleado_id WHERE e.empleado_activo = 1'
+    );
     const total = countResult[0].total;
 
     return { rows, total };
