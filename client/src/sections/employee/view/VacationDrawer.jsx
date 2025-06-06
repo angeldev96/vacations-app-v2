@@ -6,7 +6,6 @@ import isBetween from 'dayjs/plugin/isBetween';
 import React, { useState, useEffect } from 'react';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 
-import { Box } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
@@ -19,8 +18,8 @@ import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { Tab, Tabs, Checkbox, FormControlLabel } from '@mui/material';
 import { AccessTime, Assignment, BeachAccess } from '@mui/icons-material';
+import { Box, Tab, Tabs, Checkbox, FormControlLabel } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
 dayjs.extend(isBetween);

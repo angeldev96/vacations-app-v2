@@ -574,6 +574,52 @@ const deletePermissionRequest = async (permissionId) => {
   }
 };
 
+const getVacationsByPeriodAndCompany = async (fecha_inicio, fecha_fin, empresa) => {
+  try {
+    let query = `
+      SELECT 
+        e.nombre,
+        e.dni,
+        e.empresa,
+        e.dias_vacaciones_acumulados,
+        e.dias_vacaciones_tomados,
+        SUM(
+          CASE 
+            WHEN v.estado = 'Aprobada' AND v.fecha_inicio <= ? AND v.fecha_fin >= ? THEN 
+              LEAST(v.dias_solicitados, 
+                DATEDIFF(
+                  LEAST(v.fecha_fin, ?), 
+                  GREATEST(v.fecha_inicio, ?)
+                ) + 1
+              )
+            ELSE 0 
+          END
+        ) as dias_tomados_periodo
+      FROM empleados e
+      INNER JOIN vacaciones v ON e.empleado_id = v.empleado_id
+      WHERE e.empleado_activo = 1 
+        AND v.estado = 'Aprobada' 
+        AND v.fecha_inicio <= ? 
+        AND v.fecha_fin >= ?
+    `;
+    
+    let params = [fecha_fin, fecha_inicio, fecha_fin, fecha_inicio, fecha_fin, fecha_inicio];
+    
+    if (empresa) {
+      query += ' AND e.empresa = ?';
+      params.push(empresa);
+    }
+    
+    query += ' GROUP BY e.empleado_id, e.nombre, e.dni, e.empresa, e.dias_vacaciones_acumulados, e.dias_vacaciones_tomados HAVING dias_tomados_periodo > 0 ORDER BY e.nombre';
+    
+    const [rows] = await pool.query(query, params);
+    return rows;
+  } catch (error) {
+    console.error('Error al obtener vacaciones por período:', error);
+    throw error;
+  }
+};
+
 // Exportar las funciones
 module.exports = {
   connect,
@@ -604,6 +650,7 @@ module.exports = {
   getPermissionHistory,
   getPermissionsByEmployeeId,
   updatePermissionStatus,
-  deletePermissionRequest
+  deletePermissionRequest,
+  getVacationsByPeriodAndCompany
 };
 

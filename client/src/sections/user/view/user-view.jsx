@@ -70,6 +70,10 @@ export default function EmployeeTable() {
     navigate('/resumen-empleado');
   };
 
+  const handleVacationReport = () => {
+    navigate('/resumen-vacaciones');
+  };
+
   const handleFilterName = async (event) => {
     const searchValue = event.target.value;
     setFilterName(searchValue);
@@ -167,12 +171,20 @@ export default function EmployeeTable() {
           </Button>
 
           <Button
-        variant="contained"
-        color="secondary"
-        onClick={handlePrintSummary}
-      >
-        Imprimir Resumen de Vacaciones
-      </Button>
+            variant="contained"
+            color="secondary"
+            onClick={handlePrintSummary}
+          >
+            Imprimir Resumen de Vacaciones
+          </Button>
+
+          <Button
+            variant="contained"
+            color="info"
+            onClick={handleVacationReport}
+          >
+            Reporte de vacaciones por empresa
+          </Button>
         </Stack>
       </Toolbar>
 

@@ -3,6 +3,7 @@ import { Outlet, Navigate, useRoutes } from 'react-router-dom';
 
 import DashboardLayout from 'src/layouts/dashboard';
 import CreateSummary from 'src/pages/CreateSummary';
+import ResumenVacaciones from 'src/pages/ResumenVacaciones';
 
 import CreateEmployee from 'src/sections/employee/CreateEmployee';
 import UpdateEmployee from 'src/sections/employee/UpdateEmployee';
@@ -65,6 +66,10 @@ export default function Router() {
     {
       path: 'resumen-empleado',
       element: <CreateSummary/>,
+    },
+    {
+      path: 'resumen-vacaciones',
+      element: <ResumenVacaciones/>,
     },
   ]);
 

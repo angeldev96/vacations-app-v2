@@ -414,6 +414,23 @@ app.delete("/api/permissions/:id", async (req, res) => {
   }
 });
 
+// Nuevo endpoint para obtener vacaciones por período
+app.get("/api/vacations/period-report", async (req, res) => {
+  try {
+    const { fecha_inicio, fecha_fin, empresa } = req.query;
+    
+    if (!fecha_inicio || !fecha_fin) {
+      return res.status(400).json({ error: "Se requieren fecha_inicio y fecha_fin" });
+    }
+    
+    const employees = await db.getVacationsByPeriodAndCompany(fecha_inicio, fecha_fin, empresa);
+    res.json({ employees });
+  } catch (error) {
+    console.error("Error al obtener reporte de vacaciones por período:", error);
+    res.status(500).json({ error: "Error al obtener reporte de vacaciones por período" });
+  }
+});
+
 app.listen(process.env.PORT || 3001, async () => {
   console.log(`Servidor corriendo en puerto ${process.env.PORT || 3001}`);
   await db.connect();
