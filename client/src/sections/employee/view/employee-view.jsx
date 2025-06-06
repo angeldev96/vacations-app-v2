@@ -491,7 +491,6 @@ const EmployeeVacationDetails = () => {
                     <TableCell>Fecha Inicio</TableCell>
                     <TableCell>Fecha Fin</TableCell>
                     <TableCell>Días Solicitados</TableCell>
-                    <TableCell>Motivo</TableCell>
                     <TableCell>Estado</TableCell>
                     <TableCell>Acciones</TableCell>
                   </TableRow>
@@ -503,7 +502,6 @@ const EmployeeVacationDetails = () => {
                       <TableCell>{dayjs(vacation.fecha_inicio).format('DD/MM/YYYY')}</TableCell>
                       <TableCell>{dayjs(vacation.fecha_fin).format('DD/MM/YYYY')}</TableCell>
                       <TableCell>{vacation.dias_solicitados?.toFixed(2) || '0'}</TableCell>
-                      <TableCell>{vacation.motivo}</TableCell>
                       <TableCell>
                         <Typography
                           sx={{

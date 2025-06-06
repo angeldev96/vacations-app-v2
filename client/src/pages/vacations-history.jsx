@@ -8,11 +8,15 @@ import {
   Tabs,
   Table,
   Paper,
+  Select,
   TableRow,
+  MenuItem,
   TableBody,
   TableCell,
   TableHead,
   Typography,
+  InputLabel,
+  FormControl,
   TableContainer,
   TablePagination,
 } from '@mui/material';
@@ -42,6 +46,8 @@ const VacationHistoryTable = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [total, setTotal] = useState(0);
+  const [selectedCompany, setSelectedCompany] = useState('');
+  const [companies] = useState(['LYNX', 'IDSA', 'UPCO', 'ARRAYAN', 'DURRIKIKARA', 'FINCASA']);
 
   const estadoColors = {
     Aprobada: 'success.main',
@@ -62,11 +68,20 @@ const VacationHistoryTable = () => {
       fetchPermissionHistory();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, rowsPerPage, activeTab]);
+  }, [page, rowsPerPage, activeTab, selectedCompany]);
 
   const fetchVacationHistory = async () => {
     try {
-      const response = await axios.get(`http://${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/vacation-history?page=${page + 1}&limit=${rowsPerPage}`);
+      const params = {
+        page: page + 1,
+        limit: rowsPerPage,
+      };
+      
+      if (selectedCompany) {
+        params.empresa = selectedCompany;
+      }
+      
+      const response = await axios.get(`http://${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/vacation-history`, { params });
       setVacations(response.data.vacations);
       setTotal(response.data.total);
     } catch (error) {
@@ -76,7 +91,16 @@ const VacationHistoryTable = () => {
 
   const fetchPermissionHistory = async () => {
     try {
-      const response = await axios.get(`http://${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/permission-history?page=${page + 1}&limit=${rowsPerPage}`);
+      const params = {
+        page: page + 1,
+        limit: rowsPerPage,
+      };
+      
+      if (selectedCompany) {
+        params.empresa = selectedCompany;
+      }
+      
+      const response = await axios.get(`http://${import.meta.env.VITE_API_HOST}:${import.meta.env.VITE_API_PORT}/api/permission-history`, { params });
       setPermissions(response.data.permissions);
       setTotal(response.data.total);
     } catch (error) {
@@ -98,9 +122,38 @@ const VacationHistoryTable = () => {
     setPage(0); // Reset page when switching tabs
   };
 
+  const handleCompanyChange = (event) => {
+    setSelectedCompany(event.target.value);
+    setPage(0); // Reset page when changing company filter
+  };
+
   return (
     <Paper sx={{ width: '100%', mb: 2 }}>
-      <Typography variant="h4" sx={{ p: 2 }}>Historial de Vacaciones y Permisos</Typography>
+      <Box sx={{ p: 2 }}>
+        <Typography variant="h4" gutterBottom>
+          Historial de Vacaciones y Permisos
+        </Typography>
+        
+        {/* Filtro por empresa */}
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-start' }}>
+          <FormControl sx={{ minWidth: 200 }}>
+            <InputLabel id="company-select-label">Filtrar por Empresa</InputLabel>
+            <Select
+              labelId="company-select-label"
+              id="company-select"
+              value={selectedCompany}
+              label="Filtrar por Empresa"
+              onChange={handleCompanyChange}
+              size="small"
+            >
+              <MenuItem value="">Todas las Empresas</MenuItem>
+              {companies.map((company) => (
+                <MenuItem key={company} value={company}>{company}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+      </Box>
       
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={activeTab} onChange={handleTabChange} aria-label="historial tabs">
@@ -115,10 +168,10 @@ const VacationHistoryTable = () => {
             <TableHead>
               <TableRow>
                 <TableCell>Nombre</TableCell>
+                <TableCell>Empresa</TableCell>
                 <TableCell>Fecha de Solicitud</TableCell>
                 <TableCell>Fecha Inicio</TableCell>
                 <TableCell>Fecha Fin</TableCell>
-                <TableCell>Motivo</TableCell>
                 <TableCell>Estado</TableCell>
               </TableRow>
             </TableHead>
@@ -126,10 +179,10 @@ const VacationHistoryTable = () => {
               {vacations.map((row) => (
                 <TableRow key={row.vacacion_id}>
                   <TableCell>{row.nombre}</TableCell>
+                  <TableCell>{row.empresa}</TableCell>
                   <TableCell>{new Date(row.fecha_solicitud).toLocaleDateString()}</TableCell>
                   <TableCell>{new Date(row.fecha_inicio).toLocaleDateString()}</TableCell>
                   <TableCell>{new Date(row.fecha_fin).toLocaleDateString()}</TableCell>
-                  <TableCell>{row.motivo}</TableCell>
                   <TableCell>
                     <Typography
                       sx={{
@@ -156,6 +209,7 @@ const VacationHistoryTable = () => {
             <TableHead>
               <TableRow>
                 <TableCell>Nombre</TableCell>
+                <TableCell>Empresa</TableCell>
                 <TableCell>Fecha de Solicitud</TableCell>
                 <TableCell>Fecha Inicio</TableCell>
                 <TableCell>Fecha Fin</TableCell>
@@ -168,6 +222,7 @@ const VacationHistoryTable = () => {
               {permissions.map((row) => (
                 <TableRow key={row.permiso_id}>
                   <TableCell>{row.nombre}</TableCell>
+                  <TableCell>{row.empresa}</TableCell>
                   <TableCell>{new Date(row.fecha_solicitud).toLocaleDateString()}</TableCell>
                   <TableCell>{new Date(row.fecha_inicio).toLocaleDateString()}</TableCell>
                   <TableCell>{new Date(row.fecha_fin).toLocaleDateString()}</TableCell>

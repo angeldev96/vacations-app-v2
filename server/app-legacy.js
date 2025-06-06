@@ -205,7 +205,8 @@ app.get("/api/vacation-history", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const { rows, total } = await db.getVacationHistory(page, limit);
+    const empresa = req.query.empresa || null;
+    const { rows, total } = await db.getVacationHistory(page, limit, empresa);
     res.json({ vacations: rows, total });
   } catch (error) {
     console.error("Error al obtener historial de vacaciones:", error);
@@ -335,7 +336,8 @@ app.get("/api/permission-history", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const { rows, total } = await db.getPermissionHistory(page, limit);
+    const empresa = req.query.empresa || null;
+    const { rows, total } = await db.getPermissionHistory(page, limit, empresa);
     res.json({ permissions: rows, total });
   } catch (error) {
     console.error("Error al obtener historial de permisos:", error);

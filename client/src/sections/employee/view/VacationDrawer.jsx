@@ -92,7 +92,6 @@ export default function VacationDrawer({ open, toggleDrawer, employeeId }) {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
   const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [motivo, setMotivo] = useState('');
   
   // Estados para permisos
   const [conGoceDeSueldo, setConGoceDeSueldo] = useState(true);
@@ -216,7 +215,7 @@ try {
     empleado_id: employeeId,
     fecha_inicio: startDate.format('YYYY-MM-DD HH:mm:ss'),
     fecha_fin: endDate.format('YYYY-MM-DD HH:mm:ss'),
-    motivo: motivo || 'Vacaciones',
+    motivo: 'Vacaciones',
     dias_solicitados: diasSolicitados
   });
 
@@ -354,19 +353,7 @@ try {
                 {endDateBeforeStartDateError && <Alert severity="warning">La fecha final debe ser posterior a la fecha inicial.</Alert>}
                 {endDateBeforeTodayError && <Alert severity="warning">La fecha final no puede ser anterior a la fecha actual.</Alert>}
               </Box>
-              <Box sx={{ mb: 1 }}>
-                <Typography variant="subtitle1" gutterBottom>Motivo de la vacación</Typography>
-                <TextField
-                  value={motivo}
-                  onChange={e => setMotivo(e.target.value)}
-                  placeholder="Motivo de la vacación"
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  inputProps={{ maxLength: 100 }}
-                  sx={{ mb: 2 }}
-                />
-              </Box>
+
             </LocalizationProvider>
 
             <Divider sx={{ my: 3 }} />

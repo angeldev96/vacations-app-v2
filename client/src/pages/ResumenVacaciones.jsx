@@ -162,8 +162,8 @@ const ResumenVacaciones = () => {
         {/* Indicador de filtro activo */}
         {filteredByPeriod && (
           <Box mb={2}>
-            <Paper elevation={1} sx={{ p: 2, backgroundColor: 'info.light', color: 'info.contrastText' }}>
-              <Typography variant="body2">
+            <Paper elevation={1} sx={{ p: 2, backgroundColor: '#e3f2fd', border: '1px solid #1976d2' }}>
+              <Typography variant="body2" sx={{ color: '#1565c0', fontWeight: 'medium' }}>
                 Mostrando vacaciones tomadas del {fechaInicio.format('DD/MM/YYYY')} al {fechaFin.format('DD/MM/YYYY')}
               </Typography>
             </Paper>
@@ -177,23 +177,9 @@ const ResumenVacaciones = () => {
                 <TableCell sx={{ fontWeight: 'bold', backgroundColor: 'grey.800', color: 'common.white' }}>
                   Nombre del Empleado
                 </TableCell>
-                {filteredByPeriod ? (
-                  <TableCell align="center" sx={{ fontWeight: 'bold', backgroundColor: 'grey.800', color: 'common.white' }}>
-                    Días Tomados en Período
-                  </TableCell>
-                ) : (
-                  <>
-                    <TableCell align="center" sx={{ fontWeight: 'bold', backgroundColor: 'grey.800', color: 'common.white' }}>
-                      Fecha de Ingreso
-                    </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 'bold', backgroundColor: 'grey.800', color: 'common.white' }}>
-                      Días Acumulados
-                    </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 'bold', backgroundColor: 'grey.800', color: 'common.white' }}>
-                      Días Tomados
-                    </TableCell>
-                  </>
-                )}
+                <TableCell align="center" sx={{ fontWeight: 'bold', backgroundColor: 'grey.800', color: 'common.white' }}>
+                  {filteredByPeriod ? 'Días Tomados en Período' : 'Días Tomados'}
+                </TableCell>
                 <TableCell align="center" sx={{ fontWeight: 'bold', backgroundColor: 'grey.800', color: 'common.white' }}>
                   Días Disponibles
                 </TableCell>
@@ -211,19 +197,14 @@ const ResumenVacaciones = () => {
                   }}
                 >
                   <TableCell>{employee.nombre}</TableCell>
-                  {filteredByPeriod ? (
-                    <TableCell align="center" sx={{ fontWeight: 'bold', color: employee.dias_tomados_periodo > 0 ? 'warning.main' : 'text.secondary' }}>
-                      {Number(employee.dias_tomados_periodo || 0).toFixed(1)}
-                    </TableCell>
-                  ) : (
-                    <>
-                      <TableCell align="center">{dayjs(employee.fecha_ingreso).format('DD/MM/YYYY')}</TableCell>
-                      <TableCell align="center">{employee.dias_vacaciones_acumulados}</TableCell>
-                      <TableCell align="center">{Number(employee.dias_vacaciones_tomados).toFixed(2)}</TableCell>
-                    </>
-                  )}
+                  <TableCell align="center" sx={{ fontWeight: 'bold', color: filteredByPeriod && employee.dias_tomados_periodo > 0 ? 'warning.main' : 'text.secondary' }}>
+                    {filteredByPeriod 
+                      ? Number(employee.dias_tomados_periodo || 0).toFixed(1)
+                      : Number(employee.dias_vacaciones_tomados).toFixed(2)
+                    }
+                  </TableCell>
                   <TableCell align="center" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-                    {(employee.dias_vacaciones_acumulados - employee.dias_vacaciones_tomados).toFixed(2)}
+                    {employee.dias_vacaciones_acumulados}
                   </TableCell>
                 </TableRow>
               ))}

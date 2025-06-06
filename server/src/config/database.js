@@ -231,22 +231,31 @@ const insertVacationRequest = async (empleado_id, fecha_inicio, fecha_fin, motiv
 };
 
 
-const getVacationHistory = async (page = 1, limit = 10) => {
+const getVacationHistory = async (page = 1, limit = 10, empresa = null) => {
   const offset = (page - 1) * limit;
   try {
-    const [rows] = await pool.query(
-      `SELECT v.*, e.nombre, e.dni
+    let query = `SELECT v.*, e.nombre, e.dni, e.empresa
        FROM vacaciones v
        JOIN empleados e ON v.empleado_id = e.empleado_id
-       WHERE e.empleado_activo = 1
-       ORDER BY v.fecha_solicitud DESC
-       LIMIT ? OFFSET ?`,
-      [limit, offset]
-    );
+       WHERE e.empleado_activo = 1`;
     
-    const [countResult] = await pool.query(
-      'SELECT COUNT(*) as total FROM vacaciones v JOIN empleados e ON v.empleado_id = e.empleado_id WHERE e.empleado_activo = 1'
-    );
+    let countQuery = 'SELECT COUNT(*) as total FROM vacaciones v JOIN empleados e ON v.empleado_id = e.empleado_id WHERE e.empleado_activo = 1';
+    
+    const params = [];
+    const countParams = [];
+    
+    if (empresa) {
+      query += ' AND e.empresa = ?';
+      countQuery += ' AND e.empresa = ?';
+      params.push(empresa);
+      countParams.push(empresa);
+    }
+    
+    query += ' ORDER BY v.fecha_solicitud DESC LIMIT ? OFFSET ?';
+    params.push(limit, offset);
+    
+    const [rows] = await pool.query(query, params);
+    const [countResult] = await pool.query(countQuery, countParams);
     const total = countResult[0].total;
 
     return { rows, total };
@@ -513,22 +522,31 @@ const insertPermissionRequest = async (empleado_id, descripcion, con_goce_sueldo
   }
 };
 
-const getPermissionHistory = async (page = 1, limit = 10) => {
+const getPermissionHistory = async (page = 1, limit = 10, empresa = null) => {
   const offset = (page - 1) * limit;
   try {
-    const [rows] = await pool.query(
-      `SELECT p.*, e.nombre, e.dni
+    let query = `SELECT p.*, e.nombre, e.dni, e.empresa
        FROM permisos p
        JOIN empleados e ON p.empleado_id = e.empleado_id
-       WHERE e.empleado_activo = 1
-       ORDER BY p.fecha_solicitud DESC
-       LIMIT ? OFFSET ?`,
-      [limit, offset]
-    );
+       WHERE e.empleado_activo = 1`;
     
-    const [countResult] = await pool.query(
-      'SELECT COUNT(*) as total FROM permisos p JOIN empleados e ON p.empleado_id = e.empleado_id WHERE e.empleado_activo = 1'
-    );
+    let countQuery = 'SELECT COUNT(*) as total FROM permisos p JOIN empleados e ON p.empleado_id = e.empleado_id WHERE e.empleado_activo = 1';
+    
+    const params = [];
+    const countParams = [];
+    
+    if (empresa) {
+      query += ' AND e.empresa = ?';
+      countQuery += ' AND e.empresa = ?';
+      params.push(empresa);
+      countParams.push(empresa);
+    }
+    
+    query += ' ORDER BY p.fecha_solicitud DESC LIMIT ? OFFSET ?';
+    params.push(limit, offset);
+    
+    const [rows] = await pool.query(query, params);
+    const [countResult] = await pool.query(countQuery, countParams);
     const total = countResult[0].total;
 
     return { rows, total };
